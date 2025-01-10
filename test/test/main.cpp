@@ -14,7 +14,7 @@
 #include <QFileInfo>
 #include <QByteArray>
 #include <QInputDialog>
-
+#include <QMessageBox>
 class FileModifier : public QWidget {
     Q_OBJECT
 
@@ -69,24 +69,24 @@ FileModifier::FileModifier(QWidget *parent) : QWidget(parent) {
     connect(timer, &QTimer::timeout, this, &FileModifier::onTimerTimeout);
 }
 
-void FileModifier::startModification() 
+void FileModifier::startModification()
 {
-    bool ok; 
+    bool ok;
     interval = QInputDialog::getInt(this, "Интервал опроса", "Введите интервал опроса в миллисекундах:", 5000, 1000, 60000, 100, &ok);
-    
+
     if (!ok) {
         QMessageBox::warning(this, "Ошибка", "Неверный интервал");
         return;
     }
-    timerMode = true; 
-    timer->start(interval); 
+    timerMode = true;
+    timer->start(interval);
 }
 
-void FileModifier::onTimerTimeout() 
+void FileModifier::onTimerTimeout()
 {
-modifyFiles();
+    modifyFiles();
 }
-void FileModifier::modifyFiles() 
+void FileModifier::modifyFiles()
 {
     QString mask = maskEdit->text();
     QString outputPath = outputPathEdit->text();
@@ -115,7 +115,7 @@ void FileModifier::modifyFiles()
         }
 
         QByteArray fileData = inputFile.readAll();
-        inputFile.close(); 
+        inputFile.close();
 
         // Выполнение операции mod2 для всего файла
         for (int i = 0; i < fileData.size(); ++i) {
