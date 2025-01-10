@@ -69,21 +69,19 @@ FileModifier::FileModifier(QWidget *parent) : QWidget(parent) {
     connect(timer, &QTimer::timeout, this, &FileModifier::onTimerTimeout);
 }
 
-void FileModifier::startModification() {
-    // Получаем интервал опроса от пользователя
-    bool ok;
-    interval = QInputDialog::getInt(this, "Интервал опроса", "Введите интервал опроса в миллисекундах:", 5000, 1000, 60000, 100, &ok);
-    if (!ok) return; // Если пользователь отменил ввод, выходим
-
-    timerMode = true; // Устанавливаем режим таймера
-    timer->start(interval); // Запускаем таймер
+void FileModifier::startModification() 
+{
+    bool ok; interval = QInputDialog::getInt(this, "Интервал опроса", "Введите интервал опроса в миллисекундах:", 5000, 1000, 60000, 100, &ok);
+    if (!ok) return; 
+    timerMode = true; timer->start(interval); 
 }
 
-void FileModifier::onTimerTimeout() {
-    modifyFiles(); // Запускаем модификацию файлов по таймеру
+void FileModifier::onTimerTimeout() 
+{
+modifyFiles();
 }
-
-void FileModifier::modifyFiles() {
+void FileModifier::modifyFiles() 
+{
     QString mask = maskEdit->text();
     QString outputPath = outputPathEdit->text();
     QByteArray value = QByteArray::fromHex(valueEdit->text().toUtf8());
@@ -98,7 +96,7 @@ void FileModifier::modifyFiles() {
 
     if (files.isEmpty()) {
         qDebug() << "Нет файлов, соответствующих маске:" << mask;
-        return; // Завершить, если нет файлов
+        close();
     }
 
     for (const QString &file : files) {
@@ -113,9 +111,9 @@ void FileModifier::modifyFiles() {
         QByteArray fileData = inputFile.readAll();
         inputFile.close(); // Закрываем файл после чтения
 
-        // Выполнение операции XOR
-        for (int i = 0; i < qMin(fileData.size(), value.size()); ++i) {
-            fileData[i] ^= value[i]; // Выполняем XOR
+        // Выполнение операции XOR для всего файла
+        for (int i = 0; i < fileData.size(); ++i) {
+            fileData[i] ^= value[i % value.size()]; // Применяем значение по модулю
         }
 
         QString outputFilePath = outputPath + "/" + file;
@@ -141,6 +139,7 @@ void FileModifier::modifyFiles() {
         }
     }
 }
+
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
