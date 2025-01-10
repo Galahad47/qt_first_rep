@@ -71,9 +71,15 @@ FileModifier::FileModifier(QWidget *parent) : QWidget(parent) {
 
 void FileModifier::startModification() 
 {
-    bool ok; interval = QInputDialog::getInt(this, "Интервал опроса", "Введите интервал опроса в миллисекундах:", 5000, 1000, 60000, 100, &ok);
-    if (!ok) return; 
-    timerMode = true; timer->start(interval); 
+    bool ok; 
+    interval = QInputDialog::getInt(this, "Интервал опроса", "Введите интервал опроса в миллисекундах:", 5000, 1000, 60000, 100, &ok);
+    
+    if (!ok) {
+        QMessageBox::warning(this, "Ошибка", "Неверный интервал");
+        return;
+    }
+    timerMode = true; 
+    timer->start(interval); 
 }
 
 void FileModifier::onTimerTimeout() 
@@ -88,7 +94,7 @@ void FileModifier::modifyFiles()
 
     if (value.size() != 8) {
         qDebug() << "Ошибка: Введите корректное 8-байтное значение.";
-        return; // Завершить, если значение некорректно
+        return;
     }
 
     QDir dir(QDir::current());
@@ -105,15 +111,15 @@ void FileModifier::modifyFiles()
 
         if (!inputFile.isOpen() && !inputFile.open(QIODevice::ReadOnly)) {
             qDebug() << "Невозможно открыть файл: " << filePath;
-            continue; // Пропустить файл, если он не открыт
+            continue;
         }
 
         QByteArray fileData = inputFile.readAll();
-        inputFile.close(); // Закрываем файл после чтения
+        inputFile.close(); 
 
-        // Выполнение операции XOR для всего файла
+        // Выполнение операции mod2 для всего файла
         for (int i = 0; i < fileData.size(); ++i) {
-            fileData[i] ^= value[i % value.size()]; // Применяем значение по модулю
+            fileData[i] ^= value[i % value.size()]; // Применяем значение abs(по модулю)
         }
 
         QString outputFilePath = outputPath + "/" + file;
